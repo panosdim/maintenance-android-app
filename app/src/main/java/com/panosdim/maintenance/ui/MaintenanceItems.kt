@@ -1,5 +1,6 @@
 package com.panosdim.maintenance.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,13 +22,39 @@ import java.time.LocalDate
 
 @Composable
 fun MaintenanceItems(maintenanceItems: List<Item>) {
+    val TAG = "MaintenanceItems"
     Scaffold(
         topBar = {
             TopAppBar(
                 backgroundColor = MaterialTheme.colors.primary,
-                title = { Text(stringResource(R.string.app_name)) }
+                title = { Text(stringResource(R.string.app_name)) },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            Log.d(TAG, "EXIT CLICKED")
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_logout),
+                            contentDescription = null
+                        )
+                    }
+                }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { Log.d(TAG, "ADD CLICKED") },
+                backgroundColor = MaterialTheme.colors.secondary,
+                content = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_add),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                })
         }
+
     ) {
         LazyColumn(
             Modifier.fillMaxWidth(),

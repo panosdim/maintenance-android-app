@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import com.panosdim.maintenance.model.data.items
 import com.panosdim.maintenance.ui.MaintenanceItems
@@ -17,6 +18,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaintenanceTheme {
+                window?.statusBarColor = MaterialTheme.colors.primaryVariant.toArgb()
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
                     //TODO: Fetch data from firebase
