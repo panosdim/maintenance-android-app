@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Maintenance</string>
+    <string name="maintenance_date">Last maintenance on %1$s</string>
+    <string name="delayed_days">Maintenance delayed for %1$s days</string>
+    <plurals name="periodicity">
+        <item quantity="one">Every %1$d year</item>
+        <item quantity="other">Every %1$d years</item>
+    </plurals>
 </resources>
