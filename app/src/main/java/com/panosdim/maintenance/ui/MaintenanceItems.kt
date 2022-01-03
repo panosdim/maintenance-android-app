@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,12 +18,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.panosdim.maintenance.R
 import com.panosdim.maintenance.model.Item
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 
+@ExperimentalMaterialApi
 @Composable
 fun MaintenanceItems(maintenanceItems: List<Item>) {
     val TAG = "MaintenanceItems"
+    val scope = rememberCoroutineScope()
+    val bottomSheetScaffoldState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -44,14 +50,31 @@ fun MaintenanceItems(maintenanceItems: List<Item>) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { Log.d(TAG, "ADD CLICKED") },
+                onClick = {
+                    scope.launch {
+                        if (bottomSheetScaffoldState.isVisible) {
+                            bottomSheetScaffoldState.hide()
+                        } else {
+                            bottomSheetScaffoldState.show()
+                        }
+                    }
+                },
                 backgroundColor = MaterialTheme.colors.secondary,
                 content = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_add),
-                        contentDescription = null,
-                        tint = Color.White
-                    )
+                    if (bottomSheetScaffoldState.isVisible) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_close),
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_add),
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                    }
+
                 })
         }
 
@@ -82,6 +105,7 @@ fun MaintenanceItems(maintenanceItems: List<Item>) {
 
             }
         }
+        ItemForm(scope, bottomSheetScaffoldState, maintenanceItem = null)
     }
 }
 
