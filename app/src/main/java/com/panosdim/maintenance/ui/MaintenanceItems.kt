@@ -1,5 +1,6 @@
 package com.panosdim.maintenance.ui
 
+import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,25 +10,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.panosdim.maintenance.ItemDetailsActivity
 import com.panosdim.maintenance.R
 import com.panosdim.maintenance.model.Item
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 
-@ExperimentalMaterialApi
 @Composable
 fun MaintenanceItems(maintenanceItems: List<Item>) {
-    val TAG = "MaintenanceItems"
-    val scope = rememberCoroutineScope()
-    val bottomSheetScaffoldState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -37,7 +35,7 @@ fun MaintenanceItems(maintenanceItems: List<Item>) {
                 actions = {
                     IconButton(
                         onClick = {
-                            Log.d(TAG, "EXIT CLICKED")
+                            Log.d("MaintenanceItems", "EXIT CLICKED")
                         },
                     ) {
                         Icon(
@@ -51,30 +49,16 @@ fun MaintenanceItems(maintenanceItems: List<Item>) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    scope.launch {
-                        if (bottomSheetScaffoldState.isVisible) {
-                            bottomSheetScaffoldState.hide()
-                        } else {
-                            bottomSheetScaffoldState.show()
-                        }
-                    }
+                    val intent = Intent(context, ItemDetailsActivity::class.java)
+                    context.startActivity(intent)
                 },
                 backgroundColor = MaterialTheme.colors.secondary,
                 content = {
-                    if (bottomSheetScaffoldState.isVisible) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_close),
-                            contentDescription = null,
-                            tint = Color.White
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_add),
-                            contentDescription = null,
-                            tint = Color.White
-                        )
-                    }
-
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_add),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
                 })
         }
 
@@ -102,10 +86,8 @@ fun MaintenanceItems(maintenanceItems: List<Item>) {
                         )
                     }
                 }
-
             }
         }
-        ItemForm(scope, bottomSheetScaffoldState, maintenanceItem = null)
     }
 }
 

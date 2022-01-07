@@ -1,6 +1,9 @@
 package com.panosdim.maintenance.ui
 
+import android.content.Intent
 import android.content.res.Configuration
+import android.os.Bundle
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -12,6 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.panosdim.maintenance.ItemDetailsActivity
+import com.panosdim.maintenance.MSG
 import com.panosdim.maintenance.R
 import com.panosdim.maintenance.model.Item
 import com.panosdim.maintenance.model.data.items
@@ -31,11 +36,20 @@ fun ItemCard(item: Item) {
         item.periodicity
     )
     val maintenanceDate = item.date.plusYears(item.periodicity.toLong())
+    val context = LocalContext.current
+
     Card(
         modifier = Modifier
             // The space between each card and the other
             .padding(4.dp)
             .fillMaxWidth()
+            .clickable(onClick = {
+                val intent = Intent(context, ItemDetailsActivity::class.java)
+                val bundle = Bundle()
+                bundle.putParcelable(MSG.ITEM.message, item)
+                intent.putExtra(MSG.ITEM.message, item)
+                context.startActivity(intent)
+            })
             .wrapContentHeight(),
         shape = MaterialTheme.shapes.medium,
         elevation = 5.dp,

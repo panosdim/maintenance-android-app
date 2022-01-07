@@ -1,5 +1,10 @@
 package com.panosdim.maintenance.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import java.time.LocalDate
 
-data class Item(val id: Int, val name: String, val periodicity: Number, val date: LocalDate)
+
+@Parcelize
+data class Item(val id: Int, val name: String, val periodicity: Number, val date: LocalDate) :
+    Parcelable
