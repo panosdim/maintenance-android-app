@@ -76,6 +76,43 @@ fun ItemForm(
             itemLastMaintenance = date
         }
 
+        val openDialog = remember { mutableStateOf(false) }
+
+        if (openDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    openDialog.value = false
+                },
+                title = {
+                    Text(text = "Delete Item")
+                },
+                text = {
+                    Text(
+                        "Item will be deleted permanently and will not be able to recover it."
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            openDialog.value = false
+                            // TODO: DELETE item in firebase.
+                        }
+                    ) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            openDialog.value = false
+                        }
+                    ) {
+                        Text("Dismiss")
+                    }
+                }
+            )
+        }
+
         Column(
             modifier = Modifier
                 .padding(8.dp)
@@ -118,7 +155,7 @@ fun ItemForm(
                         .padding(top = 16.dp)
                 ) {
                     OutlinedButton(
-                        onClick = { /* TODO: DELETE ITEM */ },
+                        onClick = { openDialog.value = true },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
                     ) {
                         Icon(
