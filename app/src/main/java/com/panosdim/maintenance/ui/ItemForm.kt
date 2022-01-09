@@ -113,6 +113,10 @@ fun ItemForm(
             )
         }
 
+        fun isFormValid(): Boolean {
+            return !itemName.isNullOrBlank()
+        }
+
         Column(
             modifier = Modifier
                 .padding(8.dp)
@@ -120,6 +124,7 @@ fun ItemForm(
         ) {
             OutlinedTextField(
                 value = itemName,
+                isError = !isFormValid(),
                 onValueChange = { itemName = it },
                 label = { Text("Item Name") },
                 modifier = Modifier
@@ -167,6 +172,7 @@ fun ItemForm(
                         Text("Delete")
                     }
                     Button(
+                        enabled = isFormValid(),
                         onClick = { /* TODO: UPDATE ITEM */ },
                     ) {
                         Icon(
@@ -187,6 +193,7 @@ fun ItemForm(
                         .padding(top = 16.dp)
                 ) {
                     Button(
+                        enabled = isFormValid(),
                         onClick = { /* TODO: ADD ITEM */ },
                     ) {
                         Icon(
