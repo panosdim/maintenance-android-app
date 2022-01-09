@@ -114,7 +114,7 @@ fun ItemForm(
         }
 
         fun isFormValid(): Boolean {
-            return !itemName.isNullOrBlank()
+            return itemName.isNotBlank()
         }
 
         Column(
