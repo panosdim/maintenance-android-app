@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.panosdim.maintenance.R
 import com.panosdim.maintenance.fromEpochMilli
-import com.panosdim.maintenance.toShowDateFormat
+import com.panosdim.maintenance.toFormattedString
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -28,7 +28,7 @@ fun DatePicker(
 ) {
     val activity = LocalContext.current as AppCompatActivity
     val picker = MaterialDatePicker.Builder.datePicker().build()
-    val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
     Box(
         modifier = Modifier
@@ -54,8 +54,8 @@ fun DatePicker(
                 .fillMaxWidth()
         ) {
             Text(
-                text = date?.toShowDateFormat(dateFormatter) ?: LocalDate.now()
-                    .toShowDateFormat(dateFormatter),
+                text = date?.toFormattedString() ?: LocalDate.now()
+                    .toFormattedString(),
                 color = MaterialTheme.colors.onSurface,
             )
 

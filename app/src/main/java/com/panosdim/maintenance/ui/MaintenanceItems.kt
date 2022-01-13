@@ -1,7 +1,6 @@
 package com.panosdim.maintenance.ui
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,15 +16,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.panosdim.maintenance.ItemDetailsActivity
+import com.firebase.ui.auth.AuthUI
+import com.panosdim.maintenance.*
 import com.panosdim.maintenance.R
-import com.panosdim.maintenance.model.Item
 import java.time.LocalDate
 
 
 @Composable
-fun MaintenanceItems(maintenanceItems: List<Item>) {
+fun MaintenanceItems(itemsViewModel: ItemsViewModel) {
     val context = LocalContext.current
+    val maintenanceItems = itemsViewModel.maintenanceItems.toList()
 
     Scaffold(
         topBar = {
@@ -35,7 +35,15 @@ fun MaintenanceItems(maintenanceItems: List<Item>) {
                 actions = {
                     IconButton(
                         onClick = {
-                            Log.d("MaintenanceItems", "EXIT CLICKED")
+                            AuthUI.getInstance()
+                                .signOut(context)
+                                .addOnCompleteListener {
+                                    user = null
+                                    val intent = Intent(context, LoginActivity::class.java)
+                                    intent.flags =
+                                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    context.startActivity(intent)
+                                }
                         },
                     ) {
                         Icon(
@@ -70,7 +78,9 @@ fun MaintenanceItems(maintenanceItems: List<Item>) {
             items(maintenanceItems) { item ->
                 Box(contentAlignment = Alignment.TopEnd) {
                     ItemCard(item)
-                    if (item.date.plusYears(item.periodicity.toLong()).isBefore(LocalDate.now())) {
+                    if (item.date.toLocalDate().plusYears(item.periodicity.toLong())
+                            .isBefore(LocalDate.now())
+                    ) {
                         Icon(
                             modifier = Modifier.padding(12.dp),
                             painter = painterResource(id = R.drawable.ic_error),

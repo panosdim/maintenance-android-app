@@ -1,8 +1,9 @@
 package com.panosdim.maintenance.ui
 
 import android.app.Activity
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -12,9 +13,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.panosdim.maintenance.R
+import com.panosdim.maintenance.database
 import com.panosdim.maintenance.model.Item
+import com.panosdim.maintenance.user
 import java.time.LocalDate
 import kotlin.math.nextUp
 
@@ -22,25 +27,14 @@ import kotlin.math.nextUp
 fun ItemForm(
     maintenanceItem: Item?
 ) {
-    val activity = (LocalContext.current as? Activity)
+    val context = LocalContext.current
+    val activity = (context as? Activity)
 
     Scaffold(
         topBar = {
             TopAppBar(
                 backgroundColor = MaterialTheme.colors.primary,
                 title = { Text(stringResource(R.string.item_details)) },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            Log.d("ITEM_FORM", "EXIT CLICKED")
-                        },
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_logout),
-                            contentDescription = null
-                        )
-                    }
-                },
                 navigationIcon = {
                     IconButton(onClick = {
                         activity?.finish()
@@ -67,7 +61,7 @@ fun ItemForm(
         }
         var itemLastMaintenance by rememberSaveable {
             maintenanceItem?.let {
-                return@rememberSaveable mutableStateOf(it.date)
+                return@rememberSaveable mutableStateOf(LocalDate.parse(it.date))
             } ?: run {
                 return@rememberSaveable mutableStateOf(LocalDate.now())
             }
@@ -95,7 +89,15 @@ fun ItemForm(
                     TextButton(
                         onClick = {
                             openDialog.value = false
-                            // TODO: DELETE item in firebase.
+                            val myRef =
+                                database.getReference("items").child(user?.uid!!)
+                                    .child(maintenanceItem?.id!!)
+                            myRef.removeValue()
+                            Toast.makeText(
+                                context, "Item Deleted Successfully.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            activity?.finish()
                         }
                     ) {
                         Text("Confirm")
@@ -124,6 +126,11 @@ fun ItemForm(
         ) {
             OutlinedTextField(
                 value = itemName,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    capitalization =
+                    KeyboardCapitalization.Words
+                ),
                 isError = !isFormValid(),
                 onValueChange = { itemName = it },
                 label = { Text("Item Name") },
@@ -173,7 +180,23 @@ fun ItemForm(
                     }
                     Button(
                         enabled = isFormValid(),
-                        onClick = { /* TODO: UPDATE ITEM */ },
+                        onClick = {
+                            maintenanceItem.name = itemName
+                            maintenanceItem.periodicity = itemPeriodicity.toInt()
+                            maintenanceItem.date = itemLastMaintenance.toString()
+
+                            val myRef =
+                                database.getReference("items").child(user?.uid!!)
+                                    .child(maintenanceItem.id!!)
+                            myRef.setValue(maintenanceItem)
+                            myRef.child("id").removeValue()
+
+                            Toast.makeText(
+                                context, "Item Updated Successfully.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            activity?.finish()
+                        },
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_save),
@@ -194,7 +217,23 @@ fun ItemForm(
                 ) {
                     Button(
                         enabled = isFormValid(),
-                        onClick = { /* TODO: ADD ITEM */ },
+                        onClick = {
+                            val newItem = Item(
+                                name = itemName,
+                                periodicity = itemPeriodicity.toInt(),
+                                date = itemLastMaintenance.toString()
+                            )
+                            val myRef = database.getReference("items").child(user?.uid!!)
+
+                            val newItemRef = myRef.push()
+                            newItemRef.setValue(newItem)
+
+                            Toast.makeText(
+                                context, "Item Saved Successfully.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            activity?.finish()
+                        },
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_add),

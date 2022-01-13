@@ -1,23 +1,7 @@
 
 l
 <app/src/main/java/com/panosdim/maintenance/ui/theme/Shape.kt,4\1\41ff0a093f49b8835b307f448b29804e9aaa1905
-a
-1app/src/main/java/com/panosdim/maintenance/App.kt,f\1\f1744b35db9495d899943b62f7ede04192c35fc0
-h
-8app/src/main/java/com/panosdim/maintenance/model/Item.kt,8\8\8823272669ecef25e314d741e4810a8eaa47b6fc
-P
- app/src/main/AndroidManifest.xml,8\c\8c55c3ccc257e5907959013f99656e4c8ec3903e
-q
-Aapp/src/main/java/com/panosdim/maintenance/ui/MaintenanceItems.kt,5\7\57e546859ae3bc569d6025480f53a0acf6e70d84
-@
-app/build.gradle,f\4\f4a01d6a4fcb971362ec00a83903fd3902f52164
 l
 <app/src/main/java/com/panosdim/maintenance/ui/theme/Color.kt,3\c\3c7916a38aafa0a0cfdacfd8f3eaabf0f919a0ac
-i
-9app/src/main/java/com/panosdim/maintenance/ui/ItemCard.kt,3\f\3f88c3ad3e540c011225bb6c73a7867e59c77cd2
-q
-Aapp/src/main/java/com/panosdim/maintenance/ItemDetailsActivity.kt,4\f\4f23efde2686b199e27262c711b98facaf74183c
 l
 <app/src/main/java/com/panosdim/maintenance/ui/theme/Theme.kt,f\a\fa76f6ac5a534b2245abcda0e04131744f536b81
-k
-;app/src/main/java/com/panosdim/maintenance/ui/DatePicker.kt,1\c\1c516293022a5ffbbfae2cf3ac1454f3582a354e

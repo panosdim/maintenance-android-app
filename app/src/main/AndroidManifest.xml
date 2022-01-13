@@ -11,6 +11,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Maintenance">
         <activity
+            android:name=".LoginActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ItemDetailsActivity"
             android:exported="false"
             android:label="@string/title_activity_item_details"
@@ -19,13 +28,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Maintenance.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.Maintenance.NoActionBar" />
     </application>
 
 </manifest>

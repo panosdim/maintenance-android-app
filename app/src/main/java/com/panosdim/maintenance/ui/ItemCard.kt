@@ -1,7 +1,6 @@
 package com.panosdim.maintenance.ui
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,30 +12,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.panosdim.maintenance.ItemDetailsActivity
-import com.panosdim.maintenance.MSG
+import com.panosdim.maintenance.*
 import com.panosdim.maintenance.R
 import com.panosdim.maintenance.model.Item
-import com.panosdim.maintenance.model.data.items
-import com.panosdim.maintenance.ui.theme.MaintenanceTheme
 import java.time.Duration
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 
 @Composable
 fun ItemCard(item: Item) {
-    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-    val resources = LocalContext.current.resources
+    val context = LocalContext.current
+    val resources = context.resources
     val periodicityText = resources.getQuantityString(
         R.plurals.periodicity,
-        item.periodicity as Int,
+        item.periodicity,
         item.periodicity
     )
-    val maintenanceDate = item.date.plusYears(item.periodicity.toLong())
-    val context = LocalContext.current
+    val maintenanceDate = item.date.toLocalDate().plusYears(item.periodicity.toLong())
 
     Card(
         modifier = Modifier
@@ -75,7 +68,7 @@ fun ItemCard(item: Item) {
                 Text(
                     text = stringResource(
                         R.string.maintenance_date,
-                        item.date.format(dateFormatter)
+                        item.date.toLocalDate().toFormattedString()
                     ),
                     style = MaterialTheme.typography.subtitle1,
                     modifier = Modifier.padding(bottom = 4.dp)
@@ -95,32 +88,5 @@ fun ItemCard(item: Item) {
                 }
             }
         }
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true, name = "Light mode")
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, name = "Dark mode")
-@Composable
-fun ItemCardPreview() {
-    MaintenanceTheme {
-        ItemCard(items[0])
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true, name = "Light mode")
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, name = "Dark mode")
-@Composable
-fun ItemCard1Preview() {
-    MaintenanceTheme {
-        ItemCard(items[1])
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true, name = "Light mode")
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, name = "Dark mode")
-@Composable
-fun ItemCard2Preview() {
-    MaintenanceTheme {
-        ItemCard(items[2])
     }
 }
