@@ -18,4 +18,8 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="channel_name">Items that need maintenance</string>
+    <string name="permission_title">Permission Required</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="permission_description">Write to external storage is required in order to download the new app version apk file.</string>
+    <string name="new_version">New version found and is downloading on the background.</string>
 </resources>
