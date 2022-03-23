@@ -1,34 +1,45 @@
 package com.panosdim.maintenance.ui
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.panosdim.maintenance.R
+import com.panosdim.maintenance.TAG
 import com.panosdim.maintenance.database
 import com.panosdim.maintenance.model.Item
 import com.panosdim.maintenance.user
 import java.time.LocalDate
 import kotlin.math.nextUp
 
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ItemForm(
     maintenanceItem: Item?
 ) {
     val context = LocalContext.current
     val activity = (context as? Activity)
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     Scaffold(
         topBar = {
@@ -129,8 +140,16 @@ fun ItemForm(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     capitalization =
-                    KeyboardCapitalization.Words
+                    KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Done
                 ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    }
+                ),
+                singleLine = true,
                 isError = !isFormValid(),
                 onValueChange = { itemName = it },
                 label = { Text("Item Name") },
@@ -207,7 +226,9 @@ fun ItemForm(
                         Text("Update")
                     }
                 }
-            } ?: run {
+                Log.d(TAG, "Update Item form")
+            } ?: kotlin.run {
+                Log.d(TAG, "New Item form")
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End,
