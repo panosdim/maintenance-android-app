@@ -11,8 +11,8 @@ fun LocalDate.toEpochMilli(): Long {
     return this.toEpochDay() * (1000 * 60 * 60 * 24)
 }
 
-fun fromEpochMilli(date: Long): LocalDate {
-    return LocalDate.ofEpochDay(date / (1000 * 60 * 60 * 24))
+fun Long.toLocalDate(): LocalDate {
+    return LocalDate.ofEpochDay(this / (1000 * 60 * 60 * 24))
 }
 
 fun LocalDate.toFormattedString(): String {

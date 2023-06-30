@@ -36,7 +36,7 @@ class LoginActivity : AppCompatActivity() {
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
                 .setTheme(R.style.Theme_Maintenance)
-//                .setLogo(R.drawable.ic_stock)      // Set logo drawable
+                .setLogo(R.drawable.ic_notification)
                 .build()
             signInLauncher.launch(signInIntent)
         } else {

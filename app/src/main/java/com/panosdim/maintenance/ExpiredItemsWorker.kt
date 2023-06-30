@@ -1,8 +1,11 @@
 package com.panosdim.maintenance
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
@@ -47,7 +50,13 @@ class ExpiredItemsWorker(context: Context, params: WorkerParameters) : Worker(co
                     val item = itemSnapshot.getValue(Item::class.java)
                     if (item != null && item.date.toLocalDate().isBefore(today)) {
                         with(NotificationManagerCompat.from(applicationContext)) {
-                            notify(0, mBuilder.build())
+                            if (ActivityCompat.checkSelfPermission(
+                                    applicationContext,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                notify(0, mBuilder.build())
+                            }
                         }
                         break
                     }

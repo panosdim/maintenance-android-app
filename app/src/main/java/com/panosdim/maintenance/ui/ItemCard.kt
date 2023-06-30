@@ -3,19 +3,28 @@ package com.panosdim.maintenance.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.panosdim.maintenance.*
+import com.panosdim.maintenance.ItemDetailsActivity
+import com.panosdim.maintenance.MSG
 import com.panosdim.maintenance.R
+import com.panosdim.maintenance.formatDuration
+import com.panosdim.maintenance.getPeriodicity
 import com.panosdim.maintenance.model.Item
+import com.panosdim.maintenance.toFormattedString
+import com.panosdim.maintenance.toLocalDate
 import java.time.Duration
 import java.time.LocalDate
 
@@ -24,12 +33,8 @@ import java.time.LocalDate
 fun ItemCard(item: Item) {
     val context = LocalContext.current
     val resources = context.resources
-    val periodicityText = resources.getQuantityString(
-        R.plurals.periodicity,
-        item.periodicity,
-        item.periodicity
-    )
-    val maintenanceDate = item.date.toLocalDate().plusYears(item.periodicity.toLong())
+    val periodicityText = getPeriodicity(item.periodicity.toFloat(), resources)
+    val maintenanceDate = item.date.toLocalDate().plusMonths(item.periodicity.toLong())
 
     Card(
         modifier = Modifier
@@ -45,8 +50,6 @@ fun ItemCard(item: Item) {
             })
             .wrapContentHeight(),
         shape = MaterialTheme.shapes.medium,
-        elevation = 5.dp,
-        backgroundColor = MaterialTheme.colors.surface
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -54,15 +57,15 @@ fun ItemCard(item: Item) {
             Column(Modifier.padding(8.dp)) {
                 Text(
                     text = item.name,
-                    style = MaterialTheme.typography.h5,
+                    style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                         .fillMaxWidth(),
-                    color = MaterialTheme.colors.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = periodicityText,
-                    style = MaterialTheme.typography.subtitle2,
+                    style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
@@ -70,19 +73,21 @@ fun ItemCard(item: Item) {
                         R.string.maintenance_date,
                         item.date.toLocalDate().toFormattedString()
                     ),
-                    style = MaterialTheme.typography.subtitle1,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 if (maintenanceDate.isBefore(LocalDate.now())) {
                     Text(
                         text = stringResource(
                             R.string.delayed_days,
-                            Duration.between(
-                                maintenanceDate.atStartOfDay(),
-                                LocalDate.now().atStartOfDay()
-                            ).toDays()
+                            formatDuration(
+                                Duration.between(
+                                    maintenanceDate.atStartOfDay(),
+                                    LocalDate.now().atStartOfDay()
+                                ), resources
+                            )
                         ),
-                        style = MaterialTheme.typography.subtitle1,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                 }

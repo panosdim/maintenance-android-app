@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.res.Resources
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
@@ -15,9 +16,11 @@ import com.google.firebase.storage.ktx.storage
 import com.panosdim.maintenance.model.FileMetadata
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import java.time.Duration
 
 var refId: Long = -1
 
+@Suppress("DEPRECATION")
 fun checkForNewVersion(context: Context) {
     val storage = Firebase.storage
     val metadataFileName = "output-metadata.json"
@@ -92,4 +95,68 @@ fun createNotificationChannel(context: Context) {
     val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.createNotificationChannel(channel)
+}
+
+fun convertMonthsToYearsAndMonths(months: Int): Pair<Int, Int> {
+    val years = months / 12
+    val remainingMonths = months % 12
+    return Pair(years, remainingMonths)
+}
+
+fun getPeriodicity(periodicity: Float, resources: Resources): String {
+    val itemPeriodicity = convertMonthsToYearsAndMonths(periodicity.toInt())
+    return when (itemPeriodicity.first) {
+        0 -> resources.getString(
+            R.string.months_periodicity,
+            itemPeriodicity.second
+        )
+
+        else -> {
+            when (itemPeriodicity.second) {
+                0 -> resources.getQuantityString(
+                    R.plurals.periodicity,
+                    itemPeriodicity.first,
+                    itemPeriodicity.first
+                )
+
+                else -> resources.getQuantityString(
+                    R.plurals.periodicity_years_and_months,
+                    itemPeriodicity.first,
+                    itemPeriodicity.first,
+                    itemPeriodicity.second
+                )
+            }
+        }
+    }
+}
+
+fun formatDuration(duration: Duration, resources: Resources): String {
+    val years = duration.toDays() / 365
+    val months = (duration.toDays() % 365) / 30
+    val days = (duration.toDays() % 365) % 30
+
+    val sb = StringBuilder()
+    if (years > 0) sb.append(
+        resources.getQuantityString(
+            R.plurals.years,
+            years.toInt(),
+            years.toInt()
+        )
+    ).append(" ")
+    if (months > 0) sb.append(
+        resources.getQuantityString(
+            R.plurals.months,
+            months.toInt(),
+            months.toInt()
+        )
+    ).append(" ")
+    if (days > 0) sb.append(
+        resources.getQuantityString(
+            R.plurals.days,
+            days.toInt(),
+            days.toInt()
+        )
+    ).append(" ")
+
+    return sb.toString().trim()
 }

@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 data class Item(
     var id: String? = null,
     var name: String = "",
-    var periodicity: Int = 1,
+    var periodicity: Int = 6,
     var date: String = ""
 ) :
     Parcelable

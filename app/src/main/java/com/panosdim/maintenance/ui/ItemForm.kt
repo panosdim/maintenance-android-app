@@ -3,40 +3,71 @@ package com.panosdim.maintenance.ui
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.panosdim.maintenance.ItemsViewModel
 import com.panosdim.maintenance.R
 import com.panosdim.maintenance.TAG
-import com.panosdim.maintenance.database
+import com.panosdim.maintenance.getPeriodicity
 import com.panosdim.maintenance.model.Item
-import com.panosdim.maintenance.user
+import com.panosdim.maintenance.toEpochMilli
+import com.panosdim.maintenance.toLocalDate
 import java.time.LocalDate
 import kotlin.math.nextUp
 
-@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ItemForm(
-    maintenanceItem: Item?
+    maintenanceItem: Item?,
+    viewModel: ItemsViewModel
 ) {
     val context = LocalContext.current
+    val resources = context.resources
     val activity = (context as? Activity)
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -44,18 +75,17 @@ fun ItemForm(
     Scaffold(
         topBar = {
             TopAppBar(
-                backgroundColor = MaterialTheme.colors.primary,
                 title = { Text(stringResource(R.string.item_details)) },
                 navigationIcon = {
                     IconButton(onClick = {
                         activity?.finish()
                     }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), "Back")
+                        Icon(Icons.Outlined.ArrowBack, "Back")
                     }
                 },
             )
         }
-    ) {
+    ) { contentPadding ->
         var itemName by rememberSaveable {
             maintenanceItem?.let {
                 return@rememberSaveable mutableStateOf(it.name)
@@ -67,21 +97,24 @@ fun ItemForm(
             maintenanceItem?.let {
                 return@rememberSaveable mutableStateOf(it.periodicity.toFloat())
             } ?: run {
-                return@rememberSaveable mutableStateOf(1f)
+                return@rememberSaveable mutableStateOf(12f)
             }
         }
-        var itemLastMaintenance by rememberSaveable {
+        val itemLastMaintenance by rememberSaveable {
             maintenanceItem?.let {
                 return@rememberSaveable mutableStateOf(LocalDate.parse(it.date))
             } ?: run {
                 return@rememberSaveable mutableStateOf(LocalDate.now())
             }
         }
-        val onDateChange = { date: LocalDate ->
-            itemLastMaintenance = date
-        }
+        val datePickerState =
+            rememberDatePickerState(initialSelectedDateMillis = itemLastMaintenance.toEpochMilli())
 
         val openDialog = remember { mutableStateOf(false) }
+
+        var periodicityText by rememberSaveable {
+            return@rememberSaveable mutableStateOf(getPeriodicity(itemPeriodicity, resources))
+        }
 
         if (openDialog.value) {
             AlertDialog(
@@ -100,10 +133,9 @@ fun ItemForm(
                     TextButton(
                         onClick = {
                             openDialog.value = false
-                            val myRef =
-                                database.getReference("items").child(user?.uid!!)
-                                    .child(maintenanceItem?.id!!)
-                            myRef.removeValue()
+                            if (maintenanceItem != null) {
+                                viewModel.removeItem(maintenanceItem)
+                            }
                             Toast.makeText(
                                 context, "Item Deleted Successfully.",
                                 Toast.LENGTH_LONG
@@ -132,8 +164,9 @@ fun ItemForm(
 
         Column(
             modifier = Modifier
-                .padding(8.dp)
                 .fillMaxWidth()
+                .padding(contentPadding)
+                .padding(8.dp),
         ) {
             OutlinedTextField(
                 value = itemName,
@@ -158,24 +191,27 @@ fun ItemForm(
                     .fillMaxWidth()
             )
             Text(
-                text = "Periodicity ${itemPeriodicity.toInt()}"
+                text = periodicityText
             )
             Slider(
                 value = itemPeriodicity,
-                onValueChange = { itemPeriodicity = it.nextUp() },
-                valueRange = 1f..5f,
-                steps = 3,
+                onValueChange = {
+                    itemPeriodicity = it.nextUp()
+                    periodicityText = getPeriodicity(itemPeriodicity, resources)
+                },
+                valueRange = 6f..60f,
+                steps = 8,
                 colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colors.secondary,
-                    activeTrackColor = MaterialTheme.colors.secondary
+                    thumbColor = MaterialTheme.colorScheme.secondary,
+                    activeTrackColor = MaterialTheme.colorScheme.secondary
                 ),
                 modifier = Modifier.padding(bottom = 4.dp)
             )
 
-            Text(
-                text = "Last Maintenance"
+            OutlinedDatePicker(
+                state = datePickerState,
+                label = stringResource(id = R.string.last_maintenance)
             )
-            DatePicker(itemLastMaintenance, onDateChange)
 
             maintenanceItem?.let {
                 Row(
@@ -187,10 +223,9 @@ fun ItemForm(
                 ) {
                     OutlinedButton(
                         onClick = { openDialog.value = true },
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_delete),
+                            Icons.Default.Delete,
                             contentDescription = null,
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
@@ -202,13 +237,11 @@ fun ItemForm(
                         onClick = {
                             maintenanceItem.name = itemName
                             maintenanceItem.periodicity = itemPeriodicity.toInt()
-                            maintenanceItem.date = itemLastMaintenance.toString()
+                            datePickerState.selectedDateMillis?.toLocalDate()?.let {
+                                maintenanceItem.date = it.toString()
+                            }
 
-                            val myRef =
-                                database.getReference("items").child(user?.uid!!)
-                                    .child(maintenanceItem.id!!)
-                            myRef.setValue(maintenanceItem)
-                            myRef.child("id").removeValue()
+                            viewModel.updateItem(maintenanceItem)
 
                             Toast.makeText(
                                 context, "Item Updated Successfully.",
@@ -218,7 +251,7 @@ fun ItemForm(
                         },
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_save),
+                            Icons.Default.Save,
                             contentDescription = null,
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
@@ -239,25 +272,32 @@ fun ItemForm(
                     Button(
                         enabled = isFormValid(),
                         onClick = {
-                            val newItem = Item(
-                                name = itemName,
-                                periodicity = itemPeriodicity.toInt(),
-                                date = itemLastMaintenance.toString()
-                            )
-                            val myRef = database.getReference("items").child(user?.uid!!)
+                            val newItem = datePickerState.selectedDateMillis?.toLocalDate()?.let {
+                                Item(
+                                    name = itemName,
+                                    periodicity = itemPeriodicity.toInt(),
+                                    date = it.toString()
+                                )
+                            }
 
-                            val newItemRef = myRef.push()
-                            newItemRef.setValue(newItem)
+                            if (newItem != null) {
+                                viewModel.addNewItem(newItem)
+                                Toast.makeText(
+                                    context, "Item Saved Successfully.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    context, "Failed to save new item.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
 
-                            Toast.makeText(
-                                context, "Item Saved Successfully.",
-                                Toast.LENGTH_LONG
-                            ).show()
                             activity?.finish()
                         },
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_add),
+                            Icons.Filled.Add,
                             contentDescription = null,
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )

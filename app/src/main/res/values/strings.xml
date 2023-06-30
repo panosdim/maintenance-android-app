@@ -1,25 +1,33 @@
 <resources>
     <string name="app_name">Maintenance</string>
     <string name="maintenance_date">Last maintenance on %1$s</string>
-    <string name="delayed_days">Maintenance delayed for %1$s days</string>
+    <string name="delayed_days">Maintenance delayed for %1$s</string>
     <plurals name="periodicity">
         <item quantity="one">Every %1$d year</item>
         <item quantity="other">Every %1$d years</item>
     </plurals>
+    <plurals name="periodicity_years_and_months">
+        <item quantity="one">Every %1$d year and %2$d months</item>
+        <item quantity="other">Every %1$d years and %2$d months</item>
+    </plurals>
+    <plurals name="years">
+        <item quantity="one">%1$d year</item>
+        <item quantity="other">%1$d years</item>
+    </plurals>
+    <plurals name="months">
+        <item quantity="one">%1$d month</item>
+        <item quantity="other">%1$d months</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="months_periodicity">Every %1$d months</string>
     <string name="title_activity_item_details">ItemDetailsActivity</string>
     <string name="item_details">Item Details</string>
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
     <string name="channel_name">Items that need maintenance</string>
-    <string name="permission_title">Permission Required</string>
-    <string name="dismiss">Dismiss</string>
-    <string name="permission_description">Write to external storage is required in order to download the new app version apk file.</string>
     <string name="new_version">New version found and is downloading on the background.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="last_maintenance">Last Maintenance</string>
 </resources>

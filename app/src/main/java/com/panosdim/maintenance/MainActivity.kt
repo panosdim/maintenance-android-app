@@ -1,27 +1,28 @@
 package com.panosdim.maintenance
 
+import android.Manifest
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.firebase.FirebaseApp
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.panosdim.maintenance.model.Item
 import com.panosdim.maintenance.ui.MaintenanceItems
 import com.panosdim.maintenance.ui.theme.MaintenanceTheme
 import java.util.concurrent.TimeUnit
@@ -34,6 +35,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val itemsViewModel by viewModels<ItemsViewModel>()
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (!isGranted) {
+                    Toast.makeText(
+                        this,
+                        "Permissions not granted by the user.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
 
         // Handle new version installation after the download of APK file.
         manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -59,6 +73,15 @@ class MainActivity : AppCompatActivity() {
         // Check for new version
         checkForNewVersion(this)
 
+        // Check for Notifications Permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+                requestPermissionLauncher.launch(
+                    Manifest.permission.POST_NOTIFICATIONS
+                )
+            }
+        }
+
         // Check for expired items
         val itemExpiredBuilder =
             PeriodicWorkRequestBuilder<ExpiredItemsWorker>(30, TimeUnit.DAYS)
@@ -71,62 +94,15 @@ class MainActivity : AppCompatActivity() {
             itemExpiredWork
         )
 
-        val itemsRef = database.getReference("items").child(user?.uid!!)
-
-        itemsRef.addListenerForSingleValueEvent(
-            object : ValueEventListener {
-                override fun onCancelled(error: DatabaseError) {
-                    // Failed to read value
-                    Log.w(TAG, "Failed to read value.", error.toException())
-                }
-
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    // Not used
-                }
-            })
-
-        itemsRef.orderByChild("date").addChildEventListener(
-            object : ChildEventListener {
-                override fun onCancelled(dataSnapshot: DatabaseError) {
-                    // Not used
-                }
-
-                override fun onChildMoved(dataSnapshot: DataSnapshot, prevChildKey: String?) {
-                    // Not used
-                }
-
-                override fun onChildChanged(dataSnapshot: DataSnapshot, prevChildKey: String?) {
-                    val item = dataSnapshot.getValue(Item::class.java)
-                    if (item?.id != null) {
-                        item.id = dataSnapshot.key
-                        itemsViewModel.updateItem(item)
-                    }
-
-                }
-
-                override fun onChildRemoved(dataSnapshot: DataSnapshot) {
-                    val item = dataSnapshot.getValue(Item::class.java)
-                    if (item != null) {
-                        item.id = dataSnapshot.key
-                        itemsViewModel.removeItem(item)
-                    }
-                }
-
-                override fun onChildAdded(dataSnapshot: DataSnapshot, prevChildKey: String?) {
-                    val item = dataSnapshot.getValue(Item::class.java)
-                    if (item != null) {
-                        item.id = dataSnapshot.key
-                        itemsViewModel.addItem(item)
-                    }
-                }
-            })
-
         setContent {
+            val items =
+                itemsViewModel.maintenanceItems.collectAsStateWithLifecycle(initialValue = emptyList())
             MaintenanceTheme {
-                window?.statusBarColor = MaterialTheme.colors.primaryVariant.toArgb()
-                // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    MaintenanceItems(itemsViewModel)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MaintenanceItems(items.value)
                 }
             }
         }
