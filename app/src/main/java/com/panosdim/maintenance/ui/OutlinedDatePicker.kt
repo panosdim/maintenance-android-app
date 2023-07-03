@@ -20,8 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.panosdim.maintenance.R
-import com.panosdim.maintenance.toFormattedString
-import com.panosdim.maintenance.toLocalDate
+import com.panosdim.maintenance.utils.toFormattedString
+import com.panosdim.maintenance.utils.toLocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

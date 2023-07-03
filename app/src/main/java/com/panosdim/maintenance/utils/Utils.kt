@@ -1,18 +1,25 @@
-package com.panosdim.maintenance
+package com.panosdim.maintenance.utils
 
+import android.Manifest
 import android.app.DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
+import com.panosdim.maintenance.CHANNEL_ID
+import com.panosdim.maintenance.R
+import com.panosdim.maintenance.TAG
 import com.panosdim.maintenance.model.FileMetadata
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -160,3 +167,24 @@ fun formatDuration(duration: Duration, resources: Resources): String {
 
     return sb.toString().trim()
 }
+
+fun allPermissionsGranted(context: Context) = REQUIRED_PERMISSIONS.all {
+    ContextCompat.checkSelfPermission(
+        context, it
+    ) == PackageManager.PERMISSION_GRANTED
+}
+
+const val REQUEST_CODE_PERMISSIONS = 10
+val REQUIRED_PERMISSIONS =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        mutableListOf(
+            Manifest.permission.WRITE_CALENDAR,
+            Manifest.permission.READ_CALENDAR,
+            Manifest.permission.POST_NOTIFICATIONS
+        ).toTypedArray()
+    } else {
+        mutableListOf(
+            Manifest.permission.WRITE_CALENDAR,
+            Manifest.permission.READ_CALENDAR,
+        ).toTypedArray()
+    }

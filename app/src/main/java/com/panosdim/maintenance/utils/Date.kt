@@ -1,4 +1,4 @@
-package com.panosdim.maintenance
+package com.panosdim.maintenance.utils
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

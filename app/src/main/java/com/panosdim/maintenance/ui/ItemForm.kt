@@ -1,7 +1,6 @@
 package com.panosdim.maintenance.ui
 
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,11 +51,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.panosdim.maintenance.ItemsViewModel
 import com.panosdim.maintenance.R
-import com.panosdim.maintenance.TAG
-import com.panosdim.maintenance.getPeriodicity
 import com.panosdim.maintenance.model.Item
-import com.panosdim.maintenance.toEpochMilli
-import com.panosdim.maintenance.toLocalDate
+import com.panosdim.maintenance.utils.deleteEvent
+import com.panosdim.maintenance.utils.getPeriodicity
+import com.panosdim.maintenance.utils.insertEvent
+import com.panosdim.maintenance.utils.toEpochMilli
+import com.panosdim.maintenance.utils.toLocalDate
+import com.panosdim.maintenance.utils.updateEvent
 import java.time.LocalDate
 import kotlin.math.nextUp
 
@@ -134,6 +135,9 @@ fun ItemForm(
                         onClick = {
                             openDialog.value = false
                             if (maintenanceItem != null) {
+                                maintenanceItem.eventID?.let {
+                                    deleteEvent(context, it)
+                                }
                                 viewModel.removeItem(maintenanceItem)
                             }
                             Toast.makeText(
@@ -241,6 +245,19 @@ fun ItemForm(
                                 maintenanceItem.date = it.toString()
                             }
 
+                            maintenanceItem.eventID?.let { eventId ->
+                                datePickerState.selectedDateMillis?.toLocalDate()?.let { date ->
+                                    val eventDate = date.plusMonths(itemPeriodicity.toLong())
+                                    updateEvent(context, eventId, eventDate, itemName)
+                                }
+                            } ?: kotlin.run {
+                                datePickerState.selectedDateMillis?.toLocalDate()?.let { date ->
+                                    val eventDate = date.plusMonths(itemPeriodicity.toLong())
+                                    maintenanceItem.eventID =
+                                        insertEvent(context, eventDate, itemName)
+                                }
+                            }
+
                             viewModel.updateItem(maintenanceItem)
 
                             Toast.makeText(
@@ -259,9 +276,7 @@ fun ItemForm(
                         Text("Update")
                     }
                 }
-                Log.d(TAG, "Update Item form")
             } ?: kotlin.run {
-                Log.d(TAG, "New Item form")
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End,
@@ -273,10 +288,12 @@ fun ItemForm(
                         enabled = isFormValid(),
                         onClick = {
                             val newItem = datePickerState.selectedDateMillis?.toLocalDate()?.let {
+                                val eventDate = it.plusMonths(itemPeriodicity.toLong())
                                 Item(
                                     name = itemName,
                                     periodicity = itemPeriodicity.toInt(),
-                                    date = it.toString()
+                                    date = it.toString(),
+                                    eventID = insertEvent(context, eventDate, itemName)
                                 )
                             }
 

@@ -14,6 +14,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.panosdim.maintenance.model.Item
+import com.panosdim.maintenance.utils.toLocalDate
 import java.time.LocalDate.now
 
 class ExpiredItemsWorker(context: Context, params: WorkerParameters) : Worker(context, params) {

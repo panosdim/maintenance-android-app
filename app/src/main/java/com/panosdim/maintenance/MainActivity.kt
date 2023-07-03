@@ -1,12 +1,10 @@
 package com.panosdim.maintenance
 
-import android.Manifest
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -17,7 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -25,6 +23,12 @@ import androidx.work.WorkManager
 import com.google.firebase.FirebaseApp
 import com.panosdim.maintenance.ui.MaintenanceItems
 import com.panosdim.maintenance.ui.theme.MaintenanceTheme
+import com.panosdim.maintenance.utils.REQUEST_CODE_PERMISSIONS
+import com.panosdim.maintenance.utils.REQUIRED_PERMISSIONS
+import com.panosdim.maintenance.utils.allPermissionsGranted
+import com.panosdim.maintenance.utils.checkForNewVersion
+import com.panosdim.maintenance.utils.createNotificationChannel
+import com.panosdim.maintenance.utils.refId
 import java.util.concurrent.TimeUnit
 
 
@@ -35,19 +39,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val itemsViewModel by viewModels<ItemsViewModel>()
-        val requestPermissionLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted: Boolean ->
-                if (!isGranted) {
-                    Toast.makeText(
-                        this,
-                        "Permissions not granted by the user.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (!isGranted) {
+                Toast.makeText(
+                    this,
+                    "Permissions not granted by the user.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-
+        }
 
         // Handle new version installation after the download of APK file.
         manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -73,13 +75,11 @@ class MainActivity : AppCompatActivity() {
         // Check for new version
         checkForNewVersion(this)
 
-        // Check for Notifications Permissions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
-                requestPermissionLauncher.launch(
-                    Manifest.permission.POST_NOTIFICATIONS
-                )
-            }
+        // Check for permissions
+        if (!allPermissionsGranted(baseContext)) {
+            ActivityCompat.requestPermissions(
+                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+            )
         }
 
         // Check for expired items
@@ -104,6 +104,23 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     MaintenanceItems(items.value)
                 }
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults:
+        IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (!allPermissionsGranted(baseContext)) {
+                Toast.makeText(
+                    this,
+                    "Permissions not granted by the user.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                finish()
             }
         }
     }

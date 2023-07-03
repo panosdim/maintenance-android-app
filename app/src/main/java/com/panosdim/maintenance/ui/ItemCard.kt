@@ -20,11 +20,11 @@ import androidx.compose.ui.unit.dp
 import com.panosdim.maintenance.ItemDetailsActivity
 import com.panosdim.maintenance.MSG
 import com.panosdim.maintenance.R
-import com.panosdim.maintenance.formatDuration
-import com.panosdim.maintenance.getPeriodicity
 import com.panosdim.maintenance.model.Item
-import com.panosdim.maintenance.toFormattedString
-import com.panosdim.maintenance.toLocalDate
+import com.panosdim.maintenance.utils.formatDuration
+import com.panosdim.maintenance.utils.getPeriodicity
+import com.panosdim.maintenance.utils.toFormattedString
+import com.panosdim.maintenance.utils.toLocalDate
 import java.time.Duration
 import java.time.LocalDate
 

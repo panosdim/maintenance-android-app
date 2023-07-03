@@ -32,8 +32,8 @@ import com.panosdim.maintenance.ItemDetailsActivity
 import com.panosdim.maintenance.LoginActivity
 import com.panosdim.maintenance.R
 import com.panosdim.maintenance.model.Item
-import com.panosdim.maintenance.toLocalDate
 import com.panosdim.maintenance.user
+import com.panosdim.maintenance.utils.toLocalDate
 import java.time.LocalDate
 
 
