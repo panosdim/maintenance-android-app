@@ -27,12 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.firebase.ui.auth.AuthUI
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.panosdim.maintenance.ItemDetailsActivity
 import com.panosdim.maintenance.LoginActivity
 import com.panosdim.maintenance.R
 import com.panosdim.maintenance.model.Item
-import com.panosdim.maintenance.user
+import com.panosdim.maintenance.onComplete
 import com.panosdim.maintenance.utils.toLocalDate
 import java.time.LocalDate
 
@@ -49,15 +50,13 @@ fun MaintenanceItems(maintenanceItems: List<Item>) {
                 actions = {
                     FilledIconButton(
                         onClick = {
-                            AuthUI.getInstance()
-                                .signOut(context)
-                                .addOnCompleteListener {
-                                    user = null
-                                    val intent = Intent(context, LoginActivity::class.java)
-                                    intent.flags =
-                                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                    context.startActivity(intent)
-                                }
+                            context.unregisterReceiver(onComplete)
+                            Firebase.auth.signOut()
+
+                            val intent = Intent(context, LoginActivity::class.java)
+                            intent.flags =
+                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            context.startActivity(intent)
                         },
                     ) {
                         Icon(

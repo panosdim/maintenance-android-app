@@ -1,10 +1,12 @@
 package com.panosdim.maintenance
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -29,13 +31,17 @@ import com.panosdim.maintenance.utils.allPermissionsGranted
 import com.panosdim.maintenance.utils.checkForNewVersion
 import com.panosdim.maintenance.utils.createNotificationChannel
 import com.panosdim.maintenance.utils.refId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var manager: DownloadManager
-    private lateinit var onComplete: BroadcastReceiver
+    private val scope = CoroutineScope(Dispatchers.IO)
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val itemsViewModel by viewModels<ItemsViewModel>()
@@ -67,13 +73,23 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
-        registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(
+                onComplete,
+                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                RECEIVER_EXPORTED
+            )
+        } else {
+            registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        }
 
         FirebaseApp.initializeApp(this)
         createNotificationChannel(this)
 
         // Check for new version
-        checkForNewVersion(this)
+        scope.launch {
+            checkForNewVersion(this@MainActivity)
+        }
 
         // Check for permissions
         if (!allPermissionsGranted(baseContext)) {

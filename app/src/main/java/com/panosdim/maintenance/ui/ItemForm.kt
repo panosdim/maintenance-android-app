@@ -34,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -96,9 +97,9 @@ fun ItemForm(
         }
         var itemPeriodicity by rememberSaveable {
             maintenanceItem?.let {
-                return@rememberSaveable mutableStateOf(it.periodicity.toFloat())
+                return@rememberSaveable mutableFloatStateOf(it.periodicity.toFloat())
             } ?: run {
-                return@rememberSaveable mutableStateOf(12f)
+                return@rememberSaveable mutableFloatStateOf(12f)
             }
         }
         val itemLastMaintenance by rememberSaveable {
