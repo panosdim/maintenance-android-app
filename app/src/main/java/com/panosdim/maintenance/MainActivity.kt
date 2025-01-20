@@ -1,33 +1,32 @@
 package com.panosdim.maintenance
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.firebase.FirebaseApp
-import com.panosdim.maintenance.ui.MaintenanceItems
+import com.panosdim.maintenance.ui.MainScreen
 import com.panosdim.maintenance.ui.theme.MaintenanceTheme
 import com.panosdim.maintenance.utils.REQUEST_CODE_PERMISSIONS
-import com.panosdim.maintenance.utils.REQUIRED_PERMISSIONS
-import com.panosdim.maintenance.utils.allPermissionsGranted
 import com.panosdim.maintenance.utils.checkForNewVersion
 import com.panosdim.maintenance.utils.createNotificationChannel
 import com.panosdim.maintenance.utils.refId
@@ -37,24 +36,29 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     private lateinit var manager: DownloadManager
     private val scope = CoroutineScope(Dispatchers.IO)
+    private val requestPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.values.all { it }) {
+                // All permissions are granted
+                Toast.makeText(this, "Permissions granted!", Toast.LENGTH_SHORT).show()
+            } else {
+                // Some or all permissions are denied
+                Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT)
+                    .show()
+                finish() // Close the activity if permissions are essential
+            }
+        }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val itemsViewModel by viewModels<ItemsViewModel>()
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (!isGranted) {
-                Toast.makeText(
-                    this,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        enableEdgeToEdge()
+
+        if (!allPermissionsGranted(this)) {
+            requestPermissionsLauncher.launch(REQUIRED_PERMISSIONS)
         }
 
         // Handle new version installation after the download of APK file.
@@ -111,33 +115,36 @@ class MainActivity : AppCompatActivity() {
         )
 
         setContent {
-            val items =
-                itemsViewModel.maintenanceItems.collectAsStateWithLifecycle(initialValue = emptyList())
             MaintenanceTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MaintenanceItems(items.value)
+                    MainScreen()
                 }
             }
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults:
-        IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (!allPermissionsGranted(baseContext)) {
-                Toast.makeText(
-                    this,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT
-                ).show()
-                finish()
-            }
+    private fun allPermissionsGranted(context: Context): Boolean {
+        return REQUIRED_PERMISSIONS.all {
+            context.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED
         }
+    }
+
+    companion object {
+        private val REQUIRED_PERMISSIONS =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(
+                    Manifest.permission.WRITE_CALENDAR,
+                    Manifest.permission.READ_CALENDAR,
+                    Manifest.permission.POST_NOTIFICATIONS
+                )
+            } else {
+                arrayOf(
+                    Manifest.permission.WRITE_CALENDAR,
+                    Manifest.permission.READ_CALENDAR,
+                )
+            }
     }
 }

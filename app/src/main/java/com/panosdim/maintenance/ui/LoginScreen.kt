@@ -17,9 +17,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
@@ -37,7 +37,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -55,7 +54,6 @@ import com.panosdim.maintenance.R
 import com.panosdim.maintenance.paddingExtraLarge
 import com.panosdim.maintenance.paddingLarge
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(activity: LoginActivity) {
     val context = LocalContext.current
@@ -73,10 +71,7 @@ fun LoginScreen(activity: LoginActivity) {
     }
 
     fun isPasswordValid(): Boolean {
-        if (password.isEmpty() || password.length < 5) {
-            return false
-        }
-        return true
+        return !(password.isEmpty() || password.length < 5)
     }
 
     fun isFormValid(): Boolean {
@@ -143,7 +138,6 @@ fun LoginScreen(activity: LoginActivity) {
                         .padding(top = paddingLarge)
                         .fillMaxWidth(),
                     style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.secondary,
                     textAlign = TextAlign.Center,
                     text = stringResource(id = R.string.login)
                 )
@@ -262,7 +256,7 @@ fun LoginScreen(activity: LoginActivity) {
                     onClick = { login() },
                 ) {
                     Icon(
-                        Icons.Outlined.Login,
+                        Icons.AutoMirrored.Outlined.Login,
                         contentDescription = null,
                         modifier = Modifier.size(ButtonDefaults.IconSize)
                     )

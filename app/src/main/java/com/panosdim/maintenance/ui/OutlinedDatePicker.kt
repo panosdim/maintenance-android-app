@@ -67,6 +67,17 @@ fun OutlinedDatePicker(
             }
         ) {
             DatePicker(state = state, showModeToggle = false)
+
+            // Add the "Today" button inside the dialog content
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    state.selectedDateMillis = System.currentTimeMillis() // Set to current date
+                    openDatePickerDialog.value = false
+                }
+            ) {
+                Text(stringResource(R.string.today)) // Add "Today" text
+            }
         }
     }
 

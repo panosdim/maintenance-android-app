@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Maintenance</string>
-    <string name="maintenance_date">Last maintenance on %1$s</string>
+    <string name="app_name">Maintenance Tasks</string>
+    <string name="last_maintenance_date">Last %1$s</string>
     <string name="delayed_days">Maintenance delayed for %1$s</string>
     <plurals name="periodicity">
         <item quantity="one">Every %1$d year</item>
@@ -23,7 +23,6 @@
         <item quantity="other">%1$d days</item>
     </plurals>
     <string name="months_periodicity" tools:ignore="PluralsCandidate">Every %1$d months</string>
-    <string name="title_activity_item_details">ItemDetailsActivity</string>
     <string name="item_details">Item Details</string>
     <string name="channel_name">Items that need maintenance</string>
     <string name="new_version">New version found and is downloading on the background.</string>
@@ -36,4 +35,24 @@
     <string name="password">Password</string>
     <string name="icon_password_visible">Password Visible</string>
     <string name="icon_password_hidden">Password Hidden</string>
+    <string name="no_maintenance_items">No maintenance tasks found</string>
+    <string name="logout">Logout</string>
+    <string name="add_new_maintenance_task">New Maintenance Task</string>
+    <string name="items_need_maintenance">Tasks Need Maintenance</string>
+    <string name="next_maintenance">Next %1$s</string>
+    <string name="new_maintenance_task">New Maintenance Task</string>
+    <string name="create">Create</string>
+    <string name="edit_maintenance_task">Edit Maintenance Task</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="confirm">Confirm</string>
+    <string name="delete">Delete</string>
+    <string name="update">Update</string>
+    <string name="delete_maintenance_task_dialog_title">Delete maintenance task?</string>
+    <string name="delete_maintenance_task_dialog_description">If you delete the maintenance task you will not be able to recover it.</string>
+    <string name="delete_maintenance_task_result">Maintenance task deleted successfully</string>
+    <string name="generic_error_toast">Something went wrong. Try again.</string>
+    <string name="add_maintenance_task_result">New maintenance task created successfully</string>
+    <string name="update_maintenance_task_result">Maintenance task updated successfully</string>
+    <string name="today">Today</string>
+    <string name="maintenance">Maintenance Date</string>
 </resources>
