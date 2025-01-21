@@ -181,14 +181,14 @@ fun allPermissionsGranted(context: Context) = REQUIRED_PERMISSIONS.all {
 const val REQUEST_CODE_PERMISSIONS = 10
 val REQUIRED_PERMISSIONS =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        mutableListOf(
+        arrayOf(
             Manifest.permission.WRITE_CALENDAR,
             Manifest.permission.READ_CALENDAR,
             Manifest.permission.POST_NOTIFICATIONS
-        ).toTypedArray()
+        )
     } else {
-        mutableListOf(
+        arrayOf(
             Manifest.permission.WRITE_CALENDAR,
             Manifest.permission.READ_CALENDAR,
-        ).toTypedArray()
+        )
     }

@@ -15,8 +15,8 @@ android {
         applicationId = "com.panosdim.maintenance"
         minSdk = 29
         targetSdk = 35
-        versionCode = 9
-        versionName = "3.0"
+        versionCode = 10
+        versionName = "3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

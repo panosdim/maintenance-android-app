@@ -23,7 +23,6 @@
         <item quantity="other">%1$d days</item>
     </plurals>
     <string name="months_periodicity" tools:ignore="PluralsCandidate">Every %1$d months</string>
-    <string name="item_details">Item Details</string>
     <string name="channel_name">Items that need maintenance</string>
     <string name="new_version">New version found and is downloading on the background.</string>
     <string name="ok">OK</string>

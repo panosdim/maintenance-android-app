@@ -15,7 +15,7 @@ kotlinSerializationJson = "1.7.2"
 kotlinSerialization = "1.9.24"
 lifecycle = "2.8.7"
 workRuntime = "2.10.0"
-fragment = "1.6.1"
+fragment = "1.8.5"
 
 
 [libraries]

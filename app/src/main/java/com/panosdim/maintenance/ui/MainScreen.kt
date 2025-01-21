@@ -3,24 +3,32 @@ package com.panosdim.maintenance.ui
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -40,9 +48,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.ktx.auth
@@ -60,6 +70,7 @@ import com.panosdim.maintenance.utils.toLocalDate
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +78,6 @@ fun MainScreen() {
     val context = LocalContext.current
     val resources = context.resources
     val viewModel: MainViewModel = viewModel()
-    val listStatenNeedMaintenance = rememberLazyListState()
     val listStateMaintenanceTasks = rememberLazyListState()
     val today = LocalDate.now()
     val scope = rememberCoroutineScope()
@@ -108,166 +118,55 @@ fun MainScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Column(
+            Card(
                 modifier = Modifier
+                    .padding(paddingLarge)
+                    .fillMaxWidth()
                     .weight(1f)
+                    .wrapContentHeight(),
+                shape = MaterialTheme.shapes.medium,
             ) {
-                if (itemsNeedMaintenance.isNotEmpty()) {
-                    Card(
+                Column {
+                    Text(
                         modifier = Modifier
-                            .padding(paddingLarge)
                             .fillMaxWidth()
-                            .wrapContentHeight(),
-                        shape = MaterialTheme.shapes.medium,
+                            .padding(top = paddingLarge),
+                        text = stringResource(id = R.string.app_name),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+
+                    // Show Items
+                    LazyColumn(
+                        Modifier
+                            .fillMaxWidth(),
+                        contentPadding = PaddingValues(
+                            horizontal = paddingLarge,
+                            vertical = paddingLarge
+                        ),
+                        state = listStateMaintenanceTasks
                     ) {
-                        Column {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = paddingLarge),
-                                text = stringResource(id = R.string.items_need_maintenance),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.headlineMedium,
-                            )
-
-                            // Show Items
-                            LazyColumn(
-                                Modifier
-                                    .fillMaxWidth(),
-                                contentPadding = PaddingValues(
-                                    horizontal = paddingLarge,
-                                    vertical = paddingLarge
-                                ),
-                                state = listStatenNeedMaintenance
-                            ) {
-                                if (itemsNeedMaintenance.isNotEmpty()) {
-                                    itemsNeedMaintenance.iterator().forEachRemaining { item ->
-                                        item {
-                                            val maintenanceDate = item.date.toLocalDate()
-                                                .plusMonths(item.periodicity.toLong())
-                                            ListItem(
-                                                headlineContent = {
-                                                    Text(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        textAlign = TextAlign.Center,
-                                                        text = item.name,
-                                                        style = MaterialTheme.typography.headlineSmall
-                                                    )
-                                                },
-                                                supportingContent = {
-                                                    Column {
-                                                        Row(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            verticalAlignment = Alignment.CenterVertically,
-                                                            horizontalArrangement = Arrangement.SpaceBetween
-                                                        ) {
-                                                            Text(
-                                                                text = getPeriodicity(
-                                                                    item.periodicity.toFloat(),
-                                                                    resources
-                                                                ),
-                                                                style = MaterialTheme.typography.titleSmall,
-                                                            )
-                                                            Text(
-                                                                text = stringResource(
-                                                                    R.string.last_maintenance_date,
-                                                                    item.date.toLocalDate()
-                                                                        .toFormattedString()
-                                                                ),
-                                                                style = MaterialTheme.typography.titleMedium,
-                                                            )
-                                                        }
-                                                        
-                                                        Text(
-                                                            text = stringResource(
-                                                                R.string.delayed_days,
-                                                                formatDuration(
-                                                                    Duration.between(
-                                                                        maintenanceDate.atStartOfDay(),
-                                                                        LocalDate.now()
-                                                                            .atStartOfDay()
-                                                                    ), resources
-                                                                )
-                                                            ),
-                                                            style = MaterialTheme.typography.titleMedium,
-                                                        )
-                                                    }
-                                                },
-                                                modifier = Modifier.clickable {
-                                                    selectedItem = item
-                                                    scope.launch { editMaintenanceTaskSheetState.show() }
-                                                }
-                                            )
-                                            HorizontalDivider()
-                                        }
-                                    }
-                                } else {
-                                    item {
-                                        Column(
-                                            modifier = Modifier.fillMaxSize(),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Info,
-                                                contentDescription = stringResource(id = R.string.no_maintenance_items),
-                                                modifier = Modifier
-                                            )
+                        if (maintenanceItems.isNotEmpty() || itemsNeedMaintenance.isNotEmpty()) {
+                            itemsNeedMaintenance.iterator().forEachRemaining { item ->
+                                item {
+                                    val maintenanceDate = item.date.toLocalDate()
+                                        .plusMonths(item.periodicity.toLong())
+                                    ListItem(
+                                        headlineContent = {
                                             Text(
-                                                text = stringResource(id = R.string.no_maintenance_items)
+                                                modifier = Modifier.fillMaxWidth(),
+                                                textAlign = TextAlign.Center,
+                                                text = item.name,
+                                                style = MaterialTheme.typography.headlineSmall
                                             )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Card(
-                    modifier = Modifier
-                        .padding(paddingLarge)
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
-                    Column {
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = paddingLarge),
-                            text = stringResource(id = R.string.app_name),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.headlineMedium,
-                        )
-
-                        // Show Items
-                        LazyColumn(
-                            Modifier
-                                .fillMaxWidth(),
-                            contentPadding = PaddingValues(
-                                horizontal = paddingLarge,
-                                vertical = paddingLarge
-                            ),
-                            state = listStateMaintenanceTasks
-                        ) {
-                            if (maintenanceItems.isNotEmpty()) {
-                                maintenanceItems.iterator().forEachRemaining { item ->
-                                    item {
-                                        val maintenanceDate = item.date.toLocalDate()
-                                            .plusMonths(item.periodicity.toLong())
-
-                                        ListItem(
-                                            headlineContent = {
+                                        },
+                                        supportingContent = {
+                                            Column {
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     horizontalArrangement = Arrangement.SpaceBetween
                                                 ) {
-                                                    Text(
-                                                        text = item.name,
-                                                        style = MaterialTheme.typography.headlineSmall
-                                                    )
                                                     Text(
                                                         text = getPeriodicity(
                                                             item.periodicity.toFloat(),
@@ -275,64 +174,159 @@ fun MainScreen() {
                                                         ),
                                                         style = MaterialTheme.typography.titleSmall,
                                                     )
-                                                }
-
-                                            },
-                                            supportingContent = {
-                                                Column {
                                                     Text(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        textAlign = TextAlign.Center,
-                                                        text = stringResource(R.string.maintenance),
+                                                        text = stringResource(
+                                                            R.string.last_maintenance_date,
+                                                            item.date.toLocalDate()
+                                                                .toFormattedString()
+                                                        ),
                                                         style = MaterialTheme.typography.titleMedium,
                                                     )
-                                                    Row(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = Arrangement.SpaceBetween
-                                                    ) {
-                                                        Text(
-                                                            text = stringResource(
-                                                                R.string.last_maintenance_date,
-                                                                item.date.toLocalDate()
-                                                                    .toFormattedString()
-                                                            ),
-                                                            style = MaterialTheme.typography.titleMedium,
-                                                        )
-                                                        Text(
-                                                            text = stringResource(
-                                                                R.string.next_maintenance,
-                                                                maintenanceDate.toFormattedString()
-                                                            ),
-                                                            style = MaterialTheme.typography.titleMedium,
-                                                        )
-                                                    }
                                                 }
-                                            },
-                                            modifier = Modifier.clickable {
+
+                                                Text(
+                                                    text = stringResource(
+                                                        R.string.delayed_days,
+                                                        formatDuration(
+                                                            Duration.between(
+                                                                maintenanceDate.atStartOfDay(),
+                                                                LocalDate.now()
+                                                                    .atStartOfDay()
+                                                            ), resources
+                                                        )
+                                                    ),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                )
+                                            }
+                                        },
+                                        trailingContent = {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .wrapContentWidth(),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Error,
+                                                    contentDescription = null,
+                                                    tint = Color.Red,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .clickable {
                                                 selectedItem = item
                                                 scope.launch { editMaintenanceTaskSheetState.show() }
                                             }
-                                        )
-                                        HorizontalDivider()
-                                    }
+                                            .height(IntrinsicSize.Min),
+                                    )
+                                    HorizontalDivider()
                                 }
-                            } else {
+                            }
+                            maintenanceItems.iterator().forEachRemaining { item ->
                                 item {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Info,
-                                            contentDescription = stringResource(id = R.string.no_maintenance_items),
-                                            modifier = Modifier
-                                        )
-                                        Text(
-                                            text = stringResource(id = R.string.no_maintenance_items)
-                                        )
-                                    }
+                                    val maintenanceDate = item.date.toLocalDate()
+                                        .plusMonths(item.periodicity.toLong())
+
+                                    ListItem(
+                                        headlineContent = {
+                                            Text(
+                                                text = item.name,
+                                                style = MaterialTheme.typography.headlineSmall
+                                            )
+                                        },
+                                        supportingContent = {
+                                            Column {
+                                                Text(
+                                                    text = getPeriodicity(
+                                                        item.periodicity.toFloat(),
+                                                        resources
+                                                    ),
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                )
+                                                Text(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    textAlign = TextAlign.Center,
+                                                    text = stringResource(R.string.maintenance),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                )
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(
+                                                            R.string.last_maintenance_date,
+                                                            item.date.toLocalDate()
+                                                                .toFormattedString()
+                                                        ),
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                    )
+                                                    Text(
+                                                        text = stringResource(
+                                                            R.string.next_maintenance,
+                                                            maintenanceDate.toFormattedString()
+                                                        ),
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                    )
+                                                }
+                                            }
+                                        },
+                                        trailingContent = {
+                                            // Calculate days until next maintenance
+                                            val daysUntilNextMaintenance = ChronoUnit.DAYS.between(
+                                                LocalDate.now(),
+                                                maintenanceDate
+                                            )
+
+                                            // Choose the appropriate icon and color
+                                            val (icon, tint) = if (daysUntilNextMaintenance <= 30) {
+                                                Icons.Filled.Warning to Color.Yellow
+                                            } else {
+                                                Icons.Filled.CheckCircle to Color.Green
+                                            }
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .wrapContentWidth(),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = icon,
+                                                    contentDescription = null,
+                                                    tint = tint,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .clickable {
+                                                selectedItem = item
+                                                scope.launch { editMaintenanceTaskSheetState.show() }
+                                            }
+                                            .height(IntrinsicSize.Min),
+                                    )
+                                    HorizontalDivider()
+                                }
+                            }
+                        } else {
+                            item {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        Icons.Default.Info,
+                                        contentDescription = stringResource(id = R.string.no_maintenance_items),
+                                        modifier = Modifier
+                                    )
+                                    Text(
+                                        text = stringResource(id = R.string.no_maintenance_items)
+                                    )
                                 }
                             }
                         }

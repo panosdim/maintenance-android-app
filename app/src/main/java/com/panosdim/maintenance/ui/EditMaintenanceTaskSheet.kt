@@ -54,6 +54,7 @@ import com.panosdim.maintenance.R
 import com.panosdim.maintenance.data.MainViewModel
 import com.panosdim.maintenance.model.Item
 import com.panosdim.maintenance.paddingLarge
+import com.panosdim.maintenance.utils.deleteEvent
 import com.panosdim.maintenance.utils.getPeriodicity
 import com.panosdim.maintenance.utils.insertEvent
 import com.panosdim.maintenance.utils.toEpochMilli
@@ -119,6 +120,10 @@ fun EditMaintenanceTaskSheet(
                                             isLoading = false
 
                                             if (it) {
+                                                item.eventID?.let { eventID ->
+                                                    deleteEvent(context, eventID)
+                                                }
+
                                                 Toast.makeText(
                                                     context,
                                                     R.string.delete_maintenance_task_result,

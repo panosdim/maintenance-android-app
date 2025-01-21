@@ -1,13 +1,11 @@
 package com.panosdim.maintenance
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -27,6 +25,8 @@ import com.google.firebase.FirebaseApp
 import com.panosdim.maintenance.ui.MainScreen
 import com.panosdim.maintenance.ui.theme.MaintenanceTheme
 import com.panosdim.maintenance.utils.REQUEST_CODE_PERMISSIONS
+import com.panosdim.maintenance.utils.REQUIRED_PERMISSIONS
+import com.panosdim.maintenance.utils.allPermissionsGranted
 import com.panosdim.maintenance.utils.checkForNewVersion
 import com.panosdim.maintenance.utils.createNotificationChannel
 import com.panosdim.maintenance.utils.refId
@@ -124,27 +124,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun allPermissionsGranted(context: Context): Boolean {
-        return REQUIRED_PERMISSIONS.all {
-            context.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-
-    companion object {
-        private val REQUIRED_PERMISSIONS =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                arrayOf(
-                    Manifest.permission.WRITE_CALENDAR,
-                    Manifest.permission.READ_CALENDAR,
-                    Manifest.permission.POST_NOTIFICATIONS
-                )
-            } else {
-                arrayOf(
-                    Manifest.permission.WRITE_CALENDAR,
-                    Manifest.permission.READ_CALENDAR,
-                )
-            }
     }
 }
