@@ -36,7 +36,6 @@
     <string name="icon_password_hidden">Password Hidden</string>
     <string name="no_maintenance_items">No maintenance tasks found</string>
     <string name="logout">Logout</string>
-    <string name="add_new_maintenance_task">New Maintenance Task</string>
     <string name="items_need_maintenance">Tasks Need Maintenance</string>
     <string name="next_maintenance">Next %1$s</string>
     <string name="new_maintenance_task">New Maintenance Task</string>
@@ -54,4 +53,8 @@
     <string name="update_maintenance_task_result">Maintenance task updated successfully</string>
     <string name="today">Today</string>
     <string name="maintenance">Maintenance Date</string>
+    <string name="notification_passed_title">Items Needs Maintenance</string>
+    <string name="notification_passed_text">Some items needs periodic maintenance.</string>
+    <string name="notification_approaching_title">Maintenance Date Is Approaching</string>
+    <string name="notification_approaching_text">Some items will soon need periodic maintenance.</string>
 </resources>

@@ -16,6 +16,8 @@ import com.google.firebase.database.ValueEventListener
 import com.panosdim.maintenance.model.Item
 import com.panosdim.maintenance.utils.toLocalDate
 import java.time.LocalDate.now
+import java.time.temporal.ChronoUnit
+
 
 class ExpiredItemsWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
@@ -30,10 +32,18 @@ class ExpiredItemsWorker(context: Context, params: WorkerParameters) : Worker(co
                 intent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
-        val mBuilder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+        val mBuilderPassed = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Items Needs Maintenance")
-            .setContentText("Some items needs periodic maintenance.")
+            .setContentTitle(applicationContext.getString(R.string.notification_passed_title))
+            .setContentText(applicationContext.getString(R.string.notification_passed_text))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        val mBuilderApproaching = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(applicationContext.getString(R.string.notification_approaching_title))
+            .setContentText(applicationContext.getString(R.string.notification_approaching_text))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -47,18 +57,41 @@ class ExpiredItemsWorker(context: Context, params: WorkerParameters) : Worker(co
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val today = now()
+                var maintenancePassedNotification = false
+                var maintenanceApproachingNotification = false
                 for (itemSnapshot in dataSnapshot.children) {
                     val item = itemSnapshot.getValue(Item::class.java)
-                    if (item != null && item.date.toLocalDate().isBefore(today)) {
+                    if (!maintenancePassedNotification && item != null && item.date.toLocalDate()
+                            .isBefore(today)
+                    ) {
                         with(NotificationManagerCompat.from(applicationContext)) {
                             if (ActivityCompat.checkSelfPermission(
                                     applicationContext,
                                     Manifest.permission.POST_NOTIFICATIONS
                                 ) != PackageManager.PERMISSION_GRANTED
                             ) {
-                                notify(0, mBuilder.build())
+                                notify(0, mBuilderPassed.build())
+                                maintenancePassedNotification = true
                             }
                         }
+                    }
+                    if (!maintenanceApproachingNotification && item != null) {
+                        val itemDate = item.date.toLocalDate()
+                        val daysUntilItemDate = ChronoUnit.DAYS.between(today, itemDate)
+                        if (daysUntilItemDate in 0..15) {
+                            with(NotificationManagerCompat.from(applicationContext)) {
+                                if (ActivityCompat.checkSelfPermission(
+                                        applicationContext,
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    notify(1, mBuilderApproaching.build())
+                                    maintenanceApproachingNotification = true
+                                }
+                            }
+                        }
+                    }
+                    if (maintenancePassedNotification && maintenanceApproachingNotification) {
                         break
                     }
                 }

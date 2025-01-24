@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
 
         // Check for expired items
         val itemExpiredBuilder =
-            PeriodicWorkRequestBuilder<ExpiredItemsWorker>(30, TimeUnit.DAYS)
+            PeriodicWorkRequestBuilder<ExpiredItemsWorker>(1, TimeUnit.DAYS)
 
         val itemExpiredWork = itemExpiredBuilder.build()
         // Then enqueue the recurring task:
