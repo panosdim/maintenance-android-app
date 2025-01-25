@@ -42,13 +42,11 @@ class MainActivity : ComponentActivity() {
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             if (permissions.values.all { it }) {
-                // All permissions are granted
                 Toast.makeText(this, "Permissions granted!", Toast.LENGTH_SHORT).show()
             } else {
-                // Some or all permissions are denied
                 Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT)
                     .show()
-                finish() // Close the activity if permissions are essential
+                finish()
             }
         }
 
@@ -109,8 +107,8 @@ class MainActivity : ComponentActivity() {
         val itemExpiredWork = itemExpiredBuilder.build()
         // Then enqueue the recurring task:
         WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork(
-            "itemExpired",
-            ExistingPeriodicWorkPolicy.KEEP,
+            "maintenance-task-expired",
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             itemExpiredWork
         )
 
