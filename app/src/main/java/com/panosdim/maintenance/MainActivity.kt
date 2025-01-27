@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
         // Then enqueue the recurring task:
         WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork(
             "maintenance-task-expired",
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            ExistingPeriodicWorkPolicy.KEEP,
             itemExpiredWork
         )
 

@@ -61,38 +61,40 @@ class ExpiredItemsWorker(context: Context, params: WorkerParameters) : Worker(co
                 var maintenanceApproachingNotification = false
                 for (itemSnapshot in dataSnapshot.children) {
                     val item = itemSnapshot.getValue(Item::class.java)
-                    if (!maintenancePassedNotification && item != null && item.date.toLocalDate()
-                            .isBefore(today)
-                    ) {
-                        with(NotificationManagerCompat.from(applicationContext)) {
-                            if (ActivityCompat.checkSelfPermission(
-                                    applicationContext,
-                                    Manifest.permission.POST_NOTIFICATIONS
-                                ) != PackageManager.PERMISSION_GRANTED
-                            ) {
-                                notify(0, mBuilderPassed.build())
-                                maintenancePassedNotification = true
-                            }
-                        }
-                    }
-                    if (!maintenanceApproachingNotification && item != null) {
-                        val itemDate = item.date.toLocalDate()
-                        val daysUntilItemDate = ChronoUnit.DAYS.between(today, itemDate)
-                        if (daysUntilItemDate in 0..15) {
+                    if (item != null) {
+                        val maintenanceDate = item.date.toLocalDate()
+                            .plusMonths(item.periodicity.toLong())
+                        if (!maintenancePassedNotification && maintenanceDate.isBefore(today)
+                        ) {
                             with(NotificationManagerCompat.from(applicationContext)) {
                                 if (ActivityCompat.checkSelfPermission(
                                         applicationContext,
                                         Manifest.permission.POST_NOTIFICATIONS
-                                    ) != PackageManager.PERMISSION_GRANTED
+                                    ) == PackageManager.PERMISSION_GRANTED
                                 ) {
-                                    notify(1, mBuilderApproaching.build())
-                                    maintenanceApproachingNotification = true
+                                    notify(0, mBuilderPassed.build())
+                                    maintenancePassedNotification = true
                                 }
                             }
                         }
-                    }
-                    if (maintenancePassedNotification && maintenanceApproachingNotification) {
-                        break
+                        if (!maintenanceApproachingNotification) {
+                            val daysUntilItemDate = ChronoUnit.DAYS.between(today, maintenanceDate)
+                            if (daysUntilItemDate in 0..15) {
+                                with(NotificationManagerCompat.from(applicationContext)) {
+                                    if (ActivityCompat.checkSelfPermission(
+                                            applicationContext,
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        ) == PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        notify(1, mBuilderApproaching.build())
+                                        maintenanceApproachingNotification = true
+                                    }
+                                }
+                            }
+                        }
+                        if (maintenancePassedNotification && maintenanceApproachingNotification) {
+                            break
+                        }
                     }
                 }
             }
