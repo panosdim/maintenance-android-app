@@ -256,7 +256,9 @@ fun MainScreen() {
                                         .height(IntrinsicSize.Min),
                                     colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
                                 )
-                                HorizontalDivider(color = MaterialTheme.colorScheme.primary)
+                                if (item != itemsNeedMaintenance.lastOrNull() || maintenanceItems.isNotEmpty()) {
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.primary)
+                                }
                             }
                         }
                         maintenanceItems.iterator().forEachRemaining { item ->
@@ -345,7 +347,9 @@ fun MainScreen() {
                                         .height(IntrinsicSize.Min),
                                     colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
                                 )
-                                HorizontalDivider(color = MaterialTheme.colorScheme.primary)
+                                if (item != maintenanceItems.lastOrNull()) {
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.primary)
+                                }
                             }
                         }
                     } else {

@@ -18,7 +18,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
+import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.firebase.FirebaseApp
@@ -101,15 +103,19 @@ class MainActivity : ComponentActivity() {
         }
 
         // Check for expired items
-        val itemExpiredBuilder =
-            PeriodicWorkRequestBuilder<ExpiredItemsWorker>(1, TimeUnit.DAYS)
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.NOT_ROAMING)
+            .setRequiresBatteryNotLow(true)
+            .build()
 
-        val itemExpiredWork = itemExpiredBuilder.build()
-        // Then enqueue the recurring task:
-        WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork(
-            "maintenance-task-expired",
+        val workRequest = PeriodicWorkRequestBuilder<ExpiredItemsWorker>(1, TimeUnit.DAYS)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "maintenance-task-worker",
             ExistingPeriodicWorkPolicy.KEEP,
-            itemExpiredWork
+            workRequest
         )
 
         setContent {
